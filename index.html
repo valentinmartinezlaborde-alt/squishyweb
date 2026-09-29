@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SquishHaven · Tienda de squishies</title>
+<meta name="description" content="Squishies súper suaves para apretar, coleccionar y regalar. Elegí tu favorito y pedilo directo por WhatsApp."/>
+
+<!-- Fuentes e íconos -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400..800&family=Plus+Jakarta+Sans:wght@500..700&family=Quicksand:wght@500..700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<!-- Tailwind (CDN: sirve para prototipo; para producción conviene compilar el CSS) -->
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#636037",
+          "on-primary-container": "#767248",
+          "primary-container": "#fff9c4",
+          "secondary": "#326578",
+          "secondary-container": "#b5e7fe",
+          "on-secondary-container": "#37697d",
+          "secondary-fixed": "#bbe9ff",
+          "on-secondary-fixed-variant": "#154d5f",
+          "tertiary": "#805062",
+          "tertiary-fixed": "#ffd9e4",
+          "tertiary-fixed-dim": "#f2b6cb",
+          "on-tertiary-fixed-variant": "#65394b",
+          "surface": "#f9f9f9",
+          "surface-container-lowest": "#ffffff",
+          "surface-container-low": "#f3f3f3",
+          "surface-container-high": "#e8e8e8",
+          "on-surface": "#1a1c1c",
+          "on-surface-variant": "#49473c",
+          "whatsapp": "#25D366",
+          "whatsapp-dark": "#128C7E"
+        },
+        borderRadius: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px" },
+        spacing: { "gutter": "24px", "section-gap": "96px" },
+        fontFamily: {
+          display: ["Quicksand", "ui-rounded", "system-ui", "sans-serif"],
+          body: ["Nunito Sans", "system-ui", "sans-serif"],
+          label: ["Plus Jakarta Sans", "system-ui", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  body { background: #f9f9f9; color: #1a1c1c; overflow-x: hidden; font-family: "Nunito Sans", system-ui, sans-serif; }
+
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* Rebote "squishy" (del DESIGN.md) */
+  .squishy { transition: transform .45s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, background-color .25s ease, color .25s ease; }
+  .squishy:hover { transform: scale(1.04) translateY(-3px); }
+  .squishy:active { transform: scale(.95); box-shadow: inset 0 4px 10px rgba(0,0,0,.1); }
+
+  .card-neo { background: #fff; box-shadow: 0 14px 36px -12px rgba(120,190,230,.35), 0 4px 8px -4px rgba(0,0,0,.04); }
+
+  /* Título del hero: degradado pastel oscuro (legible, antes era invisible) */
+  .title-gradient {
+    background: linear-gradient(120deg, #636037 0%, #326578 50%, #805062 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* Burbujas flotantes del hero */
+  @keyframes floaty { 0%,100% { transform: translateY(0) rotate(var(--r,0deg)); } 50% { transform: translateY(-14px) rotate(var(--r,0deg)); } }
+  .floaty { animation: floaty 6s ease-in-out infinite; }
+
+  /* Cinta que se desliza */
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .marquee-track { animation: marquee 32s linear infinite; width: max-content; }
+
+  /* Toast */
+  .toast { opacity: 0; transform: translate(-50%, 20px); transition: all .3s cubic-bezier(.34,1.56,.64,1); }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* FAQ */
+  details summary::-webkit-details-marker { display: none; }
+  details[open] .faq-icon { transform: rotate(45deg); }
+  .faq-icon { transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+
+  /* Foco visible para teclado */
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid #326578; outline-offset: 3px; border-radius: 9999px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col">
+
+<!-- ─── Toast ─────────────────────────────────────────── -->
+<div id="toast" role="status" aria-live="polite" class="toast fixed bottom-28 left-1/2 bg-on-surface text-white px-6 py-3 rounded-full shadow-lg z-[100] flex items-center gap-2 pointer-events-none">
+  <span class="material-symbols-outlined icon-fill text-tertiary-fixed-dim" aria-hidden="true">favorite</span>
+  <span id="toast-text" class="font-body">¡Agregado a tu pedido!</span>
+</div>
+
+<!-- ─── WhatsApp flotante ─────────────────────────────── -->
+<a id="wa-fab" href="#" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp"
+   class="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-whatsapp text-white flex items-center justify-center squishy cursor-pointer"
+   style="box-shadow: 0 8px 28px rgba(37,211,102,.4);">
+  <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+</a>
+
+<!-- ─── Navbar ────────────────────────────────────────── -->
+<header class="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] max-w-6xl">
+  <nav class="bg-white/80 backdrop-blur-md rounded-full px-5 md:px-8 py-3 flex items-center justify-between" style="box-shadow: 0 10px 30px -10px rgba(120,190,230,.45);" aria-label="Principal">
+    <a href="#inicio" class="font-display font-bold text-2xl md:text-3xl text-primary tracking-tight">SquishHaven</a>
+
+    <ul class="hidden md:flex items-center gap-7 font-body text-on-surface-variant">
+      <li><a href="#catalogo" class="hover:text-primary transition-colors">Catálogo</a></li>
+      <li><a href="#como-pedir" class="hover:text-primary transition-colors">Cómo pedir</a></li>
+      <li><a href="#preguntas" class="hover:text-primary transition-colors">Preguntas</a></li>
+      <li><a href="#contacto" class="hover:text-primary transition-colors">Contacto</a></li>
+    </ul>
+
+    <div class="flex items-center gap-2">
+      <button id="cart-btn" class="relative w-11 h-11 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center squishy cursor-pointer" aria-label="Ver mi pedido">
+        <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
+        <span id="cart-counter" class="absolute -top-1 -right-1 min-w-6 h-6 px-1.5 bg-secondary text-white rounded-full flex items-center justify-center font-label text-xs font-bold transition-transform duration-300 scale-0">0</span>
+      </button>
+      <button id="menu-btn" class="md:hidden w-11 h-11 rounded-full bg-secondary-container/60 text-on-secondary-fixed-variant flex items-center justify-center squishy cursor-pointer" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="material-symbols-outlined" aria-hidden="true" id="menu-icon">menu</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Menú de celular -->
+  <div id="mobile-menu" hidden class="md:hidden mt-3 bg-white/95 backdrop-blur-md rounded-lg p-4" style="box-shadow: 0 20px 40px -12px rgba(120,190,230,.5);">
+    <ul class="flex flex-col gap-1 font-display text-xl font-semibold text-on-surface">
+      <li><a href="#catalogo" class="mobile-link flex items-center gap-3 px-4 py-3 rounded-full hover:bg-secondary-container/40"><span class="material-symbols-outlined text-secondary" aria-hidden="true">storefront</span>Catálogo</a></li>
+      <li><a href="#como-pedir" class="mobile-link flex items-center gap-3 px-4 py-3 rounded-full hover:bg-primary-container/70"><span class="material-symbols-outlined text-primary" aria-hidden="true">chat</span>Cómo pedir</a></li>
+      <li><a href="#preguntas" class="mobile-link flex items-center gap-3 px-4 py-3 rounded-full hover:bg-tertiary-fixed/60"><span class="material-symbols-outlined text-tertiary" aria-hidden="true">help</span>Preguntas</a></li>
+      <li><a href="#contacto" class="mobile-link flex items-center gap-3 px-4 py-3 rounded-full hover:bg-secondary-container/40"><span class="material-symbols-outlined text-secondary" aria-hidden="true">favorite</span>Contacto</a></li>
+    </ul>
+    <a href="#" data-wa="general" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-2 bg-whatsapp text-white font-bold rounded-full py-3.5 squishy">
+      Pedir por WhatsApp
+    </a>
+  </div>
+</header>
+
+<main class="flex-grow">
+
+<!-- ─── Hero ──────────────────────────────────────────── -->
+<section id="inicio" class="relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-28 pb-20">
+  <canvas id="shader-bg" class="absolute inset-0 w-full h-full z-0 opacity-80 pointer-events-none" aria-hidden="true"></canvas>
+
+  <!-- Burbujas con productos (solo decorativas) -->
+  <div class="hidden lg:block absolute inset-0 z-[5] pointer-events-none" aria-hidden="true">
+    <div class="floaty absolute left-[6%] top-[22%] w-40 h-40 rounded-full bg-white/70 p-3 shadow-xl" style="--r:-6deg"><img data-hero-img="0" alt="" class="w-full h-full rounded-full object-cover"/></div>
+    <div class="floaty absolute right-[7%] top-[18%] w-36 h-36 rounded-full bg-white/70 p-3 shadow-xl" style="--r:5deg; animation-delay:-2s"><img data-hero-img="1" alt="" class="w-full h-full rounded-full object-cover"/></div>
+    <div class="floaty absolute right-[12%] bottom-[14%] w-32 h-32 rounded-full bg-white/70 p-3 shadow-xl" style="--r:-4deg; animation-delay:-4s"><img data-hero-img="2" alt="" class="w-full h-full rounded-full object-cover"/></div>
+    <div class="floaty absolute left-[13%] bottom-[16%] px-5 py-2 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label text-sm font-bold shadow-lg" style="--r:-3deg; animation-delay:-1s">súper suaves</div>
+    <div class="floaty absolute left-[30%] top-[16%] px-5 py-2 rounded-full bg-primary-container text-on-primary-container font-label text-sm font-bold shadow-lg" style="--r:4deg; animation-delay:-3s">anti estrés</div>
+  </div>
+
+  <div id="hero-content" class="relative z-10 text-center px-5 max-w-3xl">
+    <!-- CONFIRMAR: zona -->
+    <span class="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-1.5 rounded-full font-label text-xs font-bold tracking-wider uppercase text-secondary mb-6 shadow-sm">
+      <span class="material-symbols-outlined icon-fill text-tertiary-fixed-dim text-base" aria-hidden="true">favorite</span>
+      Tienda de squishies · Buenos Aires
+    </span>
+    <h1 class="font-display font-bold text-[clamp(48px,16vw,64px)] sm:text-[96px] md:text-[120px] leading-[1] tracking-tighter title-gradient pb-2">SquishHaven</h1>
+    <p class="font-body text-lg md:text-xl text-on-surface-variant max-w-xl mx-auto mt-5 mb-9 leading-relaxed">
+      Tu refugio de ternura. Squishies súper suaves para apretar, coleccionar y regalar. Elegí tu favorito y pedilo directo por WhatsApp.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="#catalogo" class="bg-primary-container text-on-primary-container px-9 py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer" style="box-shadow: 0 15px 30px -10px rgba(230,215,100,.7);">
+        Ver catálogo
+      </a>
+      <a href="#" data-wa="general" target="_blank" rel="noopener" class="bg-white text-whatsapp-dark px-9 py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer flex items-center justify-center gap-2 shadow-lg">
+        <span class="material-symbols-outlined" aria-hidden="true">chat</span> Pedir por WhatsApp
+      </a>
+    </div>
+    <ul class="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 font-body text-sm text-on-surface-variant">
+      <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-secondary text-lg" aria-hidden="true">verified</span>Stock real</li>
+      <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-secondary text-lg" aria-hidden="true">local_shipping</span>Envíos coordinados</li>
+      <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-secondary text-lg" aria-hidden="true">forum</span>Atención personalizada</li>
+    </ul>
+  </div>
+
+  <a href="#catalogo" class="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce text-secondary opacity-70 z-10" aria-label="Bajar al catálogo">
+    <span class="material-symbols-outlined" style="font-size:32px" aria-hidden="true">expand_more</span>
+  </a>
+</section>
+
+<!-- ─── Cinta ─────────────────────────────────────────── -->
+<div class="bg-secondary-container/70 py-4 overflow-hidden -rotate-1 scale-[1.02]" aria-hidden="true">
+  <div class="marquee-track flex gap-10 font-display text-xl font-bold text-on-secondary-fixed-variant whitespace-nowrap">
+    <span>Súper estirables</span><span>✦</span><span>Con glitter</span><span>✦</span><span>Color sorpresa</span><span>✦</span><span>Anti estrés</span><span>✦</span><span>Ideales para regalar</span><span>✦</span><span>Para coleccionar</span><span>✦</span>
+    <span>Súper estirables</span><span>✦</span><span>Con glitter</span><span>✦</span><span>Color sorpresa</span><span>✦</span><span>Anti estrés</span><span>✦</span><span>Ideales para regalar</span><span>✦</span><span>Para coleccionar</span><span>✦</span>
+  </div>
+</div>
+
+<!-- ─── Catálogo ──────────────────────────────────────── -->
+<section id="catalogo" class="py-section-gap px-5 md:px-16 max-w-7xl mx-auto">
+  <div class="text-center mb-10">
+    <span class="font-label text-xs font-bold tracking-[0.16em] uppercase text-secondary">Catálogo</span>
+    <h2 class="font-display font-bold text-4xl md:text-5xl text-primary mt-2 mb-3">Nuevos amigos</h2>
+    <p class="font-body text-lg text-on-surface-variant">Suaves, apretables y esperando un abrazo.</p>
+  </div>
+
+  <div id="filters" class="flex flex-wrap justify-center gap-3 mb-12" role="group" aria-label="Filtrar por categoría"></div>
+
+  <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"></div>
+
+  <p class="text-center font-body text-on-surface-variant mt-12">
+    ¿No encontrás el que buscás? <a href="#" data-wa="consulta" target="_blank" rel="noopener" class="text-secondary font-bold underline underline-offset-4 hover:text-primary">Preguntanos por WhatsApp</a>, entran nuevos seguido.
+  </p>
+</section>
+
+<!-- ─── Por qué un squishy ────────────────────────────── -->
+<section class="bg-white rounded-t-xl rounded-b-xl py-section-gap px-5 md:px-16" style="box-shadow: 0 0 60px -20px rgba(120,190,230,.35);">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-14">
+      <span class="font-label text-xs font-bold tracking-[0.16em] uppercase text-tertiary">¿Por qué un squishy?</span>
+      <h2 class="font-display font-bold text-4xl md:text-5xl text-primary mt-2">Pequeños, blanditos y felices</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="rounded-lg p-8 bg-secondary-container/35 squishy">
+        <span class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-5 text-secondary"><span class="material-symbols-outlined" style="font-size:30px" aria-hidden="true">self_improvement</span></span>
+        <h3 class="font-display font-bold text-2xl text-on-surface mb-2">Chau estrés</h3>
+        <p class="font-body text-on-surface-variant">Apretarlo y ver cómo vuelve lentito a su forma relaja más de lo que pensás.</p>
+      </div>
+      <div class="rounded-lg p-8 bg-tertiary-fixed/50 squishy">
+        <span class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-5 text-tertiary"><span class="material-symbols-outlined" style="font-size:30px" aria-hidden="true">redeem</span></span>
+        <h3 class="font-display font-bold text-2xl text-on-surface mb-2">El regalo perfecto</h3>
+        <p class="font-body text-on-surface-variant">Para cumpleaños, para sorprender a alguien o simplemente porque sí.</p>
+      </div>
+      <div class="rounded-lg p-8 bg-primary-container/80 squishy">
+        <span class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-5 text-primary"><span class="material-symbols-outlined" style="font-size:30px" aria-hidden="true">collections_bookmark</span></span>
+        <h3 class="font-display font-bold text-2xl text-on-surface mb-2">Para coleccionar</h3>
+        <p class="font-body text-on-surface-variant">Quesitos, manteca, baos de todos los colores… una vez que tenés uno, querés la familia entera.</p>
+      </div>
+      <div class="rounded-lg p-8 bg-secondary-container/35 squishy">
+        <span class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-5 text-secondary"><span class="material-symbols-outlined" style="font-size:30px" aria-hidden="true">diversity_1</span></span>
+        <h3 class="font-display font-bold text-2xl text-on-surface mb-2">Para chicos y grandes</h3>
+        <p class="font-body text-on-surface-variant">En la mochila, en el escritorio o en la mesa de luz. Siempre a mano.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Cómo pedir ────────────────────────────────────── -->
+<section id="como-pedir" class="py-section-gap px-5 md:px-16 max-w-6xl mx-auto">
+  <div class="text-center mb-14">
+    <span class="font-label text-xs font-bold tracking-[0.16em] uppercase text-secondary">Cómo pedir</span>
+    <h2 class="font-display font-bold text-4xl md:text-5xl text-primary mt-2 mb-3">Más fácil que apretar un squishy</h2>
+    <p class="font-body text-lg text-on-surface-variant">Sin registrarte, sin vueltas.</p>
+  </div>
+  <ol class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <li class="card-neo rounded-lg p-8 text-center relative">
+      <span class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-primary-container text-on-primary-container font-display font-bold text-xl flex items-center justify-center shadow">1</span>
+      <span class="material-symbols-outlined text-secondary mt-3 mb-3" style="font-size:44px" aria-hidden="true">touch_app</span>
+      <h3 class="font-display font-bold text-2xl mb-2">Elegí tus favoritos</h3>
+      <p class="font-body text-on-surface-variant">Tocá “Agregar al pedido” en los que te gusten. Podés sumar varios.</p>
+    </li>
+    <li class="card-neo rounded-lg p-8 text-center relative">
+      <span class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-display font-bold text-xl flex items-center justify-center shadow">2</span>
+      <span class="material-symbols-outlined text-whatsapp-dark mt-3 mb-3" style="font-size:44px" aria-hidden="true">chat</span>
+      <h3 class="font-display font-bold text-2xl mb-2">Mandalo por WhatsApp</h3>
+      <p class="font-body text-on-surface-variant">Abrí tu pedido y tocá “Enviar por WhatsApp”. El mensaje se arma solo.</p>
+    </li>
+    <li class="card-neo rounded-lg p-8 text-center relative">
+      <span class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-display font-bold text-xl flex items-center justify-center shadow">3</span>
+      <span class="material-symbols-outlined text-tertiary mt-3 mb-3" style="font-size:44px" aria-hidden="true">package_2</span>
+      <h3 class="font-display font-bold text-2xl mb-2">Coordinamos y listo</h3>
+      <p class="font-body text-on-surface-variant">Te confirmamos stock, forma de pago y entrega. Y tu nuevo amigo sale para tu casa.</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ─── Preguntas frecuentes ──────────────────────────── -->
+<!-- CONFIRMAR: envíos y medios de pago -->
+<section id="preguntas" class="py-section-gap px-5 md:px-16 max-w-3xl mx-auto">
+  <div class="text-center mb-12">
+    <span class="font-label text-xs font-bold tracking-[0.16em] uppercase text-tertiary">Preguntas frecuentes</span>
+    <h2 class="font-display font-bold text-4xl md:text-5xl text-primary mt-2">Todo lo que querés saber</h2>
+  </div>
+  <div class="flex flex-col gap-4">
+    <details class="card-neo rounded-lg px-7 py-5 group">
+      <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Hacen envíos?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
+      <p class="font-body text-on-surface-variant mt-3">Sí. Escribinos por WhatsApp con tu zona y te pasamos las opciones de envío o retiro que te queden más cómodas.</p>
+    </details>
+    <details class="card-neo rounded-lg px-7 py-5">
+      <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Cómo puedo pagar?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
+      <p class="font-body text-on-surface-variant mt-3">Transferencia, Mercado Pago o efectivo al retirar. Lo coordinamos cuando confirmamos tu pedido.</p>
+    </details>
+    <details class="card-neo rounded-lg px-7 py-5">
+      <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Puedo ver fotos reales antes de comprar?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
+      <p class="font-body text-on-surface-variant mt-3">¡Claro! Pedinos por WhatsApp y te mandamos foto o video del squishy que te llevás, con los colores que tenemos disponibles en ese momento.</p>
+    </details>
+    <details class="card-neo rounded-lg px-7 py-5">
+      <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Cómo cuido mi squishy?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
+      <p class="font-body text-on-surface-variant mt-3">Guardalo lejos del sol directo y del calor. Si se ensucia, limpialo suave con un paño húmedo y dejalo secar al aire. Los de glitter tienen líquido adentro: nada de uñas, tijeras ni mordidas.</p>
+    </details>
+    <details class="card-neo rounded-lg px-7 py-5">
+      <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Son aptos para chicos?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
+      <p class="font-body text-on-surface-variant mt-3">Son ideales desde los 3 años. Con los más chiquitos conviene estar atentos para que no lo muerdan.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ─── CTA final ─────────────────────────────────────── -->
+<section id="contacto" class="px-5 md:px-16 pb-section-gap">
+  <div class="max-w-5xl mx-auto rounded-xl px-8 py-16 md:py-20 text-center relative overflow-hidden"
+       style="background: linear-gradient(135deg, #fff9c4 0%, #d9f3ff 55%, #ffe3ec 100%);">
+    <div class="absolute -top-16 -left-16 w-56 h-56 rounded-full bg-white/40" aria-hidden="true"></div>
+    <div class="absolute -bottom-20 -right-10 w-72 h-72 rounded-full bg-white/30" aria-hidden="true"></div>
+    <div class="relative">
+      <h2 class="font-display font-bold text-4xl md:text-5xl text-primary mb-4">¿Ya encontraste a tu nuevo amigo?</h2>
+      <p class="font-body text-lg text-on-surface-variant max-w-xl mx-auto mb-9">Escribinos y te ayudamos a elegir. Respondemos rapidito.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#" data-wa="general" target="_blank" rel="noopener" class="bg-whatsapp text-white px-9 py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer flex items-center justify-center gap-2" style="box-shadow: 0 12px 28px -8px rgba(37,211,102,.55);">
+          <span class="material-symbols-outlined" aria-hidden="true">chat</span> Escribir por WhatsApp
+        </a>
+        <a id="ig-btn" href="#" target="_blank" rel="noopener" class="bg-white text-tertiary px-9 py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer flex items-center justify-center gap-2 shadow-lg">
+          <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span> Ver Instagram
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ─── Footer ────────────────────────────────────────── -->
+<footer class="w-full rounded-t-xl bg-surface-container-low px-5 md:px-16 py-12">
+  <div class="flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl mx-auto text-center md:text-left">
+    <div>
+      <div class="font-display font-bold text-2xl text-primary">SquishHaven</div>
+      <p class="font-body text-sm text-on-surface-variant mt-1">Hecho con amor y nubes.</p>
+    </div>
+    <ul class="flex flex-wrap justify-center gap-6 font-body text-on-surface-variant">
+      <li><a href="#catalogo" class="hover:text-secondary transition-colors">Catálogo</a></li>
+      <li><a href="#como-pedir" class="hover:text-secondary transition-colors">Cómo pedir</a></li>
+      <li><a href="#preguntas" class="hover:text-secondary transition-colors">Preguntas</a></li>
+      <li><a href="#" data-wa="general" target="_blank" rel="noopener" class="hover:text-secondary transition-colors">WhatsApp</a></li>
+    </ul>
+    <p class="font-body text-sm text-secondary">© <span id="year"></span> SquishHaven</p>
+  </div>
+</footer>
+
+<!-- ─── Panel del pedido ──────────────────────────────── -->
+<div id="cart-overlay" hidden class="fixed inset-0 bg-on-surface/30 backdrop-blur-sm z-[60]"></div>
+<aside id="cart-panel" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-surface z-[70] translate-x-full transition-transform duration-500 flex flex-col" style="transition-timing-function: cubic-bezier(.34,1.2,.64,1); box-shadow: -20px 0 60px -20px rgba(120,190,230,.5);" aria-label="Tu pedido" aria-hidden="true">
+  <div class="flex items-center justify-between px-6 py-5">
+    <h2 class="font-display font-bold text-2xl text-primary">Tu pedido</h2>
+    <button id="cart-close" class="w-11 h-11 rounded-full bg-surface-container-high flex items-center justify-center squishy cursor-pointer" aria-label="Cerrar pedido">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto px-6 flex flex-col gap-4"></div>
+  <div class="px-6 py-6 bg-white rounded-t-lg" style="box-shadow: 0 -10px 30px -12px rgba(0,0,0,.08);">
+    <div class="flex justify-between font-body text-lg mb-4"><span class="text-on-surface-variant">Total</span><span id="cart-total" class="font-bold text-on-surface">—</span></div>
+    <a id="cart-send" href="#" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 w-full bg-whatsapp text-white py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer">
+      <span class="material-symbols-outlined" aria-hidden="true">send</span> Enviar por WhatsApp
+    </a>
+    <p class="font-body text-xs text-on-surface-variant text-center mt-3">Te confirmamos stock, pago y envío por chat.</p>
+  </div>
+</aside>
+
+<script>
+// ─── Configuración (EDITAR ACÁ) ──────────────────────────────
+const CONFIG = {
+  // Número con código de país, sin "+" ni espacios. Ej: 5491123456789
+  whatsapp: "5491100000000",
+  instagram: "squishhaven", // usuario sin @
+  tienda: "SquishHaven",
+};
+
+// ─── Productos (EDITAR ACÁ) ──────────────────────────────────
+// fotos: rutas en /img. La primera es la principal; tocando la foto se pasa a la siguiente.
+// precio: número en pesos. Si es null, se muestra "Consultar precio".
+// color: "celeste" | "amarillo" | "rosa" (el fondo de la tarjeta)
+const PRODUCTOS = [
+  { id: "queso", nombre: "Queso Squeeze", categoria: "Comiditas", etiqueta: "Estirable", color: "amarillo", precio: null,
+    descripcion: "Un cubito de queso de 7 cm que se aprieta, se estira y vuelve a su forma.",
+    fotos: ["img/queso-1.jpg", "img/queso-2.jpg"] },
+  { id: "manteca", nombre: "Manteca Squishy", categoria: "Comiditas", etiqueta: "Súper estirable", color: "celeste", precio: null,
+    descripcion: "Un pan de manteca que se retuerce, se hunde y vuelve como nuevo.",
+    fotos: ["img/manteca-1.jpg", "img/manteca-2.jpg", "img/manteca-3.jpg"] },
+  { id: "bao", nombre: "Bao en vaporera", categoria: "Baos", etiqueta: "Color sorpresa", color: "rosa", precio: null,
+    descripcion: "Un bollito con carita que viene en su propia vaporera. ¿Qué color te va a tocar?",
+    fotos: ["img/bao-1.jpg", "img/bao-2.jpg", "img/bao-3.jpg"] },
+  { id: "bao-glitter", nombre: "Bao Glitter", categoria: "Glitter", etiqueta: "Con brillos", color: "celeste", precio: null,
+    descripcion: "El bao de siempre, pero lleno de brillitos que se mueven cuando lo apretás.",
+    fotos: ["img/bao-glitter-1.jpg", "img/bao-glitter-2.jpg"] },
+  { id: "gotita-glitter", nombre: "Gotita Glitter", categoria: "Glitter", etiqueta: "Con brillos", color: "rosa", precio: null,
+    descripcion: "Una gotita transparente llena de glitter, blandita y hipnótica.",
+    fotos: ["img/gotita-glitter-1.jpg"] },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────
+const COLORES = {
+  celeste:  { circulo: "bg-secondary-container/40", chip: "bg-secondary-fixed text-on-secondary-fixed-variant", icono: "text-secondary" },
+  amarillo: { circulo: "bg-primary-container",      chip: "bg-primary-container text-on-primary-container",   icono: "text-primary" },
+  rosa:     { circulo: "bg-tertiary-fixed/60",      chip: "bg-tertiary-fixed text-on-tertiary-fixed-variant", icono: "text-tertiary" },
+};
+const $ = (s) => document.querySelector(s);
+const pesos = (n) => "$" + n.toLocaleString("es-AR");
+const waLink = (texto) => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
+const WA_MENSAJES = {
+  general:  `¡Hola ${CONFIG.tienda}! Quiero consultar por los squishies 💛`,
+  consulta: `¡Hola ${CONFIG.tienda}! ¿Tienen algún squishy que no esté en la página?`,
+};
+
+// ─── Links de WhatsApp e Instagram ───────────────────────────
+$("#wa-fab").href = waLink(WA_MENSAJES.general);
+document.querySelectorAll("[data-wa]").forEach(a => a.href = waLink(WA_MENSAJES[a.dataset.wa]));
+$("#ig-btn").href = `https://instagram.com/${CONFIG.instagram}`;
+$("#year").textContent = new Date().getFullYear();
+
+// Fotos del hero: la principal de los primeros 3 productos
+document.querySelectorAll("[data-hero-img]").forEach(img => {
+  const p = PRODUCTOS[+img.dataset.heroImg];
+  if (p) img.src = p.fotos[0]; else img.parentElement.remove();
+});
+
+// ─── Catálogo ────────────────────────────────────────────────
+let filtro = "Todos";
+
+function renderFiltros() {
+  const cats = ["Todos", ...new Set(PRODUCTOS.map(p => p.categoria))];
+  $("#filters").innerHTML = cats.map(c => `
+    <button data-cat="${c}" aria-pressed="${c === filtro}"
+      class="px-5 py-2.5 rounded-full font-label text-sm font-bold squishy cursor-pointer ${c === filtro ? "bg-secondary text-white shadow-md" : "bg-white text-on-surface-variant shadow-sm hover:bg-secondary-container/50"}">${c}</button>`).join("");
+}
+
+function renderProductos() {
+  const lista = PRODUCTOS.filter(p => filtro === "Todos" || p.categoria === filtro);
+  $("#product-grid").innerHTML = lista.map(p => {
+    const c = COLORES[p.color] || COLORES.celeste;
+    const varias = p.fotos.length > 1;
+    const puntos = varias ? `<span class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-white/80 backdrop-blur px-2.5 py-1.5 rounded-full" aria-hidden="true">
+        ${p.fotos.map((_, n) => `<span data-dot="${n}" class="w-2 h-2 rounded-full transition-colors ${n === 0 ? "bg-secondary" : "bg-on-surface/20"}"></span>`).join("")}</span>` : "";
+    return `
+    <article class="card-neo rounded-xl p-5 pb-7 flex flex-col items-center text-center squishy group">
+      <button ${varias ? `data-gal="${p.id}"` : "disabled"} data-i="0" class="relative w-full aspect-square rounded-lg overflow-hidden ${c.circulo} mb-6 ${varias ? "cursor-pointer" : "cursor-default"}" aria-label="${varias ? `Ver otra foto de ${p.nombre}` : p.nombre}">
+        <img src="${p.fotos[0]}" alt="Squishy ${p.nombre}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+        ${puntos}
+      </button>
+      <span class="${c.chip} px-4 py-1 rounded-full font-label text-xs font-bold tracking-wide mb-3">${p.etiqueta}</span>
+      <h3 class="font-display font-bold text-2xl text-on-surface mb-1">${p.nombre}</h3>
+      <p class="font-body text-on-surface-variant mb-3 px-2">${p.descripcion}</p>
+      <p class="font-body text-lg text-primary font-bold mb-6">${p.precio ? pesos(p.precio) : "Consultar precio"}</p>
+      <div class="flex gap-3 w-full mt-auto">
+        <button data-add="${p.id}" class="flex-1 bg-surface-container-high text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container py-3.5 rounded-full font-body font-bold flex items-center justify-center gap-2 squishy cursor-pointer">
+          <span class="material-symbols-outlined" style="font-size:20px" aria-hidden="true">add_shopping_cart</span> Agregar al pedido
+        </button>
+        <a href="${waLink(`¡Hola ${CONFIG.tienda}! Me interesa el squishy "${p.nombre}". ¿Está disponible?`)}" target="_blank" rel="noopener"
+           class="w-14 shrink-0 rounded-full bg-whatsapp/15 text-whatsapp-dark hover:bg-whatsapp hover:text-white flex items-center justify-center squishy cursor-pointer" aria-label="Consultar ${p.nombre} por WhatsApp">
+          <span class="material-symbols-outlined" aria-hidden="true">chat</span>
+        </a>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+$("#filters").addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  filtro = b.dataset.cat; renderFiltros(); renderProductos();
+});
+$("#product-grid").addEventListener("click", e => {
+  const add = e.target.closest("[data-add]");
+  if (add) return agregar(add.dataset.add);
+  // Galería: cada toque muestra la siguiente foto
+  const gal = e.target.closest("[data-gal]"); if (!gal) return;
+  const p = PRODUCTOS.find(x => x.id === gal.dataset.gal);
+  const i = (+gal.dataset.i + 1) % p.fotos.length;
+  gal.dataset.i = i;
+  gal.querySelector("img").src = p.fotos[i];
+  gal.querySelectorAll("[data-dot]").forEach(d => {
+    d.classList.toggle("bg-secondary", +d.dataset.dot === i);
+    d.classList.toggle("bg-on-surface/20", +d.dataset.dot !== i);
+  });
+});
+
+// ─── Pedido (carrito) ────────────────────────────────────────
+let pedido = {};
+try { pedido = JSON.parse(localStorage.getItem("squish-pedido")) || {}; } catch (_) {}
+const guardar = () => { try { localStorage.setItem("squish-pedido", JSON.stringify(pedido)); } catch (_) {} };
+
+function agregar(id) {
+  pedido[id] = (pedido[id] || 0) + 1;
+  guardar(); renderPedido();
+  const btn = $("#cart-btn");
+  btn.style.transform = "scale(1.2)"; setTimeout(() => btn.style.transform = "", 220);
+  toast(`¡${PRODUCTOS.find(p => p.id === id).nombre} se sumó a tu pedido!`);
+}
+function cambiar(id, delta) {
+  pedido[id] = (pedido[id] || 0) + delta;
+  if (pedido[id] <= 0) delete pedido[id];
+  guardar(); renderPedido();
+}
+
+function renderPedido() {
+  const items = Object.entries(pedido).map(([id, cant]) => ({ ...PRODUCTOS.find(p => p.id === id), cant })).filter(i => i.nombre);
+  const total = items.reduce((n, i) => n + i.cant, 0);
+  const counter = $("#cart-counter");
+  counter.textContent = total;
+  counter.classList.toggle("scale-0", total === 0);
+
+  $("#cart-items").innerHTML = items.length ? items.map(i => {
+    const c = COLORES[i.color] || COLORES.celeste;
+    const mini = `<img src="${i.fotos[0]}" alt="" class="w-full h-full rounded-full object-cover"/>`;
+    return `
+    <div class="card-neo rounded-lg p-4 flex items-center gap-4">
+      <div class="w-16 h-16 rounded-full ${c.circulo} p-1.5 flex items-center justify-center shrink-0">${mini}</div>
+      <div class="flex-1 min-w-0">
+        <p class="font-display font-bold text-lg leading-tight">${i.nombre}</p>
+        <p class="font-body text-sm text-primary font-bold">${i.precio ? pesos(i.precio * i.cant) : "A consultar"}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button data-q="${i.id}" data-d="-1" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center squishy cursor-pointer" aria-label="Quitar uno de ${i.nombre}"><span class="material-symbols-outlined text-lg" aria-hidden="true">remove</span></button>
+        <span class="w-6 text-center font-bold">${i.cant}</span>
+        <button data-q="${i.id}" data-d="1" class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center squishy cursor-pointer" aria-label="Sumar uno de ${i.nombre}"><span class="material-symbols-outlined text-lg" aria-hidden="true">add</span></button>
+      </div>
+    </div>`;
+  }).join("") : `
+    <div class="flex-1 flex flex-col items-center justify-center text-center py-16">
+      <span class="material-symbols-outlined text-secondary-container icon-fill mb-4" style="font-size:80px" aria-hidden="true">cloud</span>
+      <p class="font-display font-bold text-xl mb-1">Tu pedido está vacío</p>
+      <p class="font-body text-on-surface-variant">Sumá algún squishy del catálogo.</p>
+    </div>`;
+
+  const conPrecio = items.every(i => i.precio);
+  $("#cart-total").textContent = !items.length ? "—" : conPrecio ? pesos(items.reduce((n, i) => n + i.precio * i.cant, 0)) : "A consultar";
+
+  const send = $("#cart-send");
+  send.classList.toggle("opacity-40", !items.length);
+  send.classList.toggle("pointer-events-none", !items.length);
+  send.href = waLink(
+    `¡Hola ${CONFIG.tienda}! Quiero hacer este pedido:\n` +
+    items.map(i => `• ${i.cant} x ${i.nombre}`).join("\n") +
+    `\n\n¿Me confirmás disponibilidad, precio y opciones de envío? ¡Gracias!`
+  );
+}
+$("#cart-items").addEventListener("click", e => {
+  const b = e.target.closest("[data-q]"); if (b) cambiar(b.dataset.q, +b.dataset.d);
+});
+
+function abrirPedido(abrir) {
+  $("#cart-panel").classList.toggle("translate-x-full", !abrir);
+  $("#cart-panel").setAttribute("aria-hidden", String(!abrir));
+  $("#cart-overlay").hidden = !abrir;
+  document.body.style.overflow = abrir ? "hidden" : "";
+  if (abrir) $("#cart-close").focus();
+}
+$("#cart-btn").addEventListener("click", () => abrirPedido(true));
+$("#cart-close").addEventListener("click", () => abrirPedido(false));
+$("#cart-overlay").addEventListener("click", () => abrirPedido(false));
+document.addEventListener("keydown", e => { if (e.key === "Escape") { abrirPedido(false); menu(false); } });
+
+// ─── Menú de celular ─────────────────────────────────────────
+function menu(abrir) {
+  $("#mobile-menu").hidden = !abrir;
+  $("#menu-btn").setAttribute("aria-expanded", String(abrir));
+  $("#menu-btn").setAttribute("aria-label", abrir ? "Cerrar menú" : "Abrir menú");
+  $("#menu-icon").textContent = abrir ? "close" : "menu";
+}
+$("#menu-btn").addEventListener("click", () => menu($("#mobile-menu").hidden));
+document.querySelectorAll("#mobile-menu a").forEach(a => a.addEventListener("click", () => menu(false)));
+
+// ─── Toast ───────────────────────────────────────────────────
+let toastTimer;
+function toast(texto) {
+  $("#toast-text").textContent = texto;
+  $("#toast").classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $("#toast").classList.remove("show"), 2000);
+}
+
+// ─── Hero: se desvanece al scrollear ─────────────────────────
+const hero = $("#hero-content");
+window.addEventListener("scroll", () => {
+  const y = window.scrollY;
+  if (y > 600) return;
+  hero.style.opacity = Math.max(0, 1 - y / 450);
+  hero.style.transform = `translateY(${y * 0.3}px)`;
+}, { passive: true });
+
+// ─── Fondo animado (shader de Stitch: manchas pastel) ────────
+(function () {
+  const canvas = $("#shader-bg");
+  const gl = canvas.getContext("webgl");
+  if (!gl) { canvas.style.background = "linear-gradient(135deg,#b3e5fc,#fff9c4)"; return; }
+  const vs = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
+  const fs = `precision highp float;varying vec2 v;uniform float t;uniform vec2 r;
+    float c(vec2 p,float s){return length(p)-s;}
+    void main(){vec2 p=(v-.5)*2.;p.x*=r.x/r.y;
+      vec3 y=vec3(1.,.98,.77),b=vec3(.70,.90,.99);float d=0.;
+      for(float i=0.;i<4.;i++){vec2 o=vec2(sin(t*.5+i*1.5)*.5,cos(t*.3+i*2.)*.3);
+        d+=1./(c(p-o,.4+.1*sin(t*.8+i))*10.+10.);}
+      vec3 col=mix(b,y,smoothstep(.1,.5,d));
+      col+=fract(sin(dot(v,vec2(12.9898,78.233)))*43758.5453)*.02;
+      gl_FragColor=vec4(col,1.);}`;
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const a = gl.getAttribLocation(prog, "a");
+  gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+  const uT = gl.getUniformLocation(prog, "t"), uR = gl.getUniformLocation(prog, "r");
+  const quieto = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function frame(ms) {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    gl.viewport(0, 0, w, h);
+    gl.uniform1f(uT, quieto ? 2 : ms / 1000);
+    gl.uniform2f(uR, w, h);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    if (!quieto) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ─── Inicio ──────────────────────────────────────────────────
+renderFiltros();
+renderProductos();
+renderPedido();
+</script>
+</body>
+</html>
