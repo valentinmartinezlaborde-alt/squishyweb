@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SquishHaven · Tienda de squishies</title>
+<title>Loop Creativo · Squishies</title>
 <meta name="description" content="Squishies súper suaves para apretar, coleccionar y regalar. Elegí tu favorito y pedilo directo por WhatsApp."/>
 
 <!-- Fuentes e íconos -->
@@ -54,6 +54,7 @@
 
 <style>
   html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  [hidden] { display: none !important; } /* que "hidden" le gane a clases como flex */
   body { background: #f9f9f9; color: #1a1c1c; overflow-x: hidden; font-family: "Nunito Sans", system-ui, sans-serif; }
 
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
@@ -117,7 +118,7 @@
 <!-- ─── Navbar ────────────────────────────────────────── -->
 <header class="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] max-w-6xl">
   <nav class="bg-white/80 backdrop-blur-md rounded-full px-5 md:px-8 py-3 flex items-center justify-between" style="box-shadow: 0 10px 30px -10px rgba(120,190,230,.45);" aria-label="Principal">
-    <a href="#inicio" class="font-display font-bold text-2xl md:text-3xl text-primary tracking-tight">SquishHaven</a>
+    <a href="#inicio" class="font-display font-bold text-2xl md:text-3xl text-primary tracking-tight">Loop Creativo</a>
 
     <ul class="hidden md:flex items-center gap-7 font-body text-on-surface-variant">
       <li><a href="#catalogo" class="hover:text-primary transition-colors">Catálogo</a></li>
@@ -158,7 +159,7 @@
   <canvas id="shader-bg" class="absolute inset-0 w-full h-full z-0 opacity-80 pointer-events-none" aria-hidden="true"></canvas>
 
   <!-- Burbujas con productos (solo decorativas) -->
-  <div class="hidden lg:block absolute inset-0 z-[5] pointer-events-none" aria-hidden="true">
+  <div class="hidden xl:block absolute inset-0 z-[5] pointer-events-none" aria-hidden="true">
     <div class="floaty absolute left-[6%] top-[22%] w-40 h-40 rounded-full bg-white/70 p-3 shadow-xl" style="--r:-6deg"><img data-hero-img="0" alt="" class="w-full h-full rounded-full object-cover"/></div>
     <div class="floaty absolute right-[7%] top-[18%] w-36 h-36 rounded-full bg-white/70 p-3 shadow-xl" style="--r:5deg; animation-delay:-2s"><img data-hero-img="1" alt="" class="w-full h-full rounded-full object-cover"/></div>
     <div class="floaty absolute right-[12%] bottom-[14%] w-32 h-32 rounded-full bg-white/70 p-3 shadow-xl" style="--r:-4deg; animation-delay:-4s"><img data-hero-img="2" alt="" class="w-full h-full rounded-full object-cover"/></div>
@@ -167,14 +168,13 @@
   </div>
 
   <div id="hero-content" class="relative z-10 text-center px-5 max-w-3xl">
-    <!-- CONFIRMAR: zona -->
     <span class="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-1.5 rounded-full font-label text-xs font-bold tracking-wider uppercase text-secondary mb-6 shadow-sm">
       <span class="material-symbols-outlined icon-fill text-tertiary-fixed-dim text-base" aria-hidden="true">favorite</span>
       Tienda de squishies · Buenos Aires
     </span>
-    <h1 class="font-display font-bold text-[clamp(48px,16vw,64px)] sm:text-[96px] md:text-[120px] leading-[1] tracking-tighter title-gradient pb-2">SquishHaven</h1>
+    <h1 class="font-display font-bold text-[clamp(44px,14vw,64px)] sm:text-[88px] md:text-[112px] leading-[1] tracking-tighter title-gradient pb-2">Loop Creativo</h1>
     <p class="font-body text-lg md:text-xl text-on-surface-variant max-w-xl mx-auto mt-5 mb-9 leading-relaxed">
-      Tu refugio de ternura. Squishies súper suaves para apretar, coleccionar y regalar. Elegí tu favorito y pedilo directo por WhatsApp.
+      Tu refugio de ternura. Squishies súper suaves para apretar, coleccionar y regalar. Elegí tus favoritos y comprá en un par de clics.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <a href="#catalogo" class="bg-primary-container text-on-primary-container px-9 py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer" style="box-shadow: 0 15px 30px -10px rgba(230,215,100,.7);">
@@ -242,7 +242,7 @@
       <div class="rounded-lg p-8 bg-primary-container/80 squishy">
         <span class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-5 text-primary"><span class="material-symbols-outlined" style="font-size:30px" aria-hidden="true">collections_bookmark</span></span>
         <h3 class="font-display font-bold text-2xl text-on-surface mb-2">Para coleccionar</h3>
-        <p class="font-body text-on-surface-variant">Quesitos, manteca, baos de todos los colores… una vez que tenés uno, querés la familia entera.</p>
+        <p class="font-body text-on-surface-variant">Quesitos, manteca, dumplings de todos los colores… una vez que tenés uno, querés la familia entera.</p>
       </div>
       <div class="rounded-lg p-8 bg-secondary-container/35 squishy">
         <span class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-5 text-secondary"><span class="material-symbols-outlined" style="font-size:30px" aria-hidden="true">diversity_1</span></span>
@@ -269,21 +269,20 @@
     </li>
     <li class="card-neo rounded-lg p-8 text-center relative">
       <span class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-display font-bold text-xl flex items-center justify-center shadow">2</span>
-      <span class="material-symbols-outlined text-whatsapp-dark mt-3 mb-3" style="font-size:44px" aria-hidden="true">chat</span>
-      <h3 class="font-display font-bold text-2xl mb-2">Mandalo por WhatsApp</h3>
-      <p class="font-body text-on-surface-variant">Abrí tu pedido y tocá “Enviar por WhatsApp”. El mensaje se arma solo.</p>
+      <span class="material-symbols-outlined text-secondary mt-3 mb-3" style="font-size:44px" aria-hidden="true">lock</span>
+      <h3 class="font-display font-bold text-2xl mb-2">Finalizá la compra</h3>
+      <p class="font-body text-on-surface-variant">Abrí tu pedido y tocá “Finalizar compra”. Pasás a nuestra tienda online con todo ya cargado.</p>
     </li>
     <li class="card-neo rounded-lg p-8 text-center relative">
       <span class="absolute -top-5 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-display font-bold text-xl flex items-center justify-center shadow">3</span>
       <span class="material-symbols-outlined text-tertiary mt-3 mb-3" style="font-size:44px" aria-hidden="true">package_2</span>
-      <h3 class="font-display font-bold text-2xl mb-2">Coordinamos y listo</h3>
-      <p class="font-body text-on-surface-variant">Te confirmamos stock, forma de pago y entrega. Y tu nuevo amigo sale para tu casa.</p>
+      <h3 class="font-display font-bold text-2xl mb-2">Pagá y recibilo</h3>
+      <p class="font-body text-on-surface-variant">Elegís envío, pagás con Mercado Pago, transferencia o efectivo, y tu nuevo amigo sale para tu casa.</p>
     </li>
   </ol>
 </section>
 
 <!-- ─── Preguntas frecuentes ──────────────────────────── -->
-<!-- CONFIRMAR: envíos y medios de pago -->
 <section id="preguntas" class="py-section-gap px-5 md:px-16 max-w-3xl mx-auto">
   <div class="text-center mb-12">
     <span class="font-label text-xs font-bold tracking-[0.16em] uppercase text-tertiary">Preguntas frecuentes</span>
@@ -292,15 +291,15 @@
   <div class="flex flex-col gap-4">
     <details class="card-neo rounded-lg px-7 py-5 group">
       <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Hacen envíos?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
-      <p class="font-body text-on-surface-variant mt-3">Sí. Escribinos por WhatsApp con tu zona y te pasamos las opciones de envío o retiro que te queden más cómodas.</p>
+      <p class="font-body text-on-surface-variant mt-3">Sí. Estamos en Buenos Aires y hacemos envíos. Cuando finalizás la compra, ponés tu código postal y ves las opciones y el costo para tu zona.</p>
     </details>
     <details class="card-neo rounded-lg px-7 py-5">
       <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Cómo puedo pagar?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
-      <p class="font-body text-on-surface-variant mt-3">Transferencia, Mercado Pago o efectivo al retirar. Lo coordinamos cuando confirmamos tu pedido.</p>
+      <p class="font-body text-on-surface-variant mt-3">Transferencia, Mercado Pago o efectivo. Lo elegís en el último paso, cuando finalizás la compra en nuestra tienda online.</p>
     </details>
     <details class="card-neo rounded-lg px-7 py-5">
       <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Puedo ver fotos reales antes de comprar?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
-      <p class="font-body text-on-surface-variant mt-3">¡Claro! Pedinos por WhatsApp y te mandamos foto o video del squishy que te llevás, con los colores que tenemos disponibles en ese momento.</p>
+      <p class="font-body text-on-surface-variant mt-3">¡Claro! Escribinos por Instagram y te mandamos foto o video del squishy que te llevás, con los colores que tenemos disponibles en ese momento.</p>
     </details>
     <details class="card-neo rounded-lg px-7 py-5">
       <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-bold text-xl">¿Cómo cuido mi squishy?<span class="faq-icon material-symbols-outlined text-secondary" aria-hidden="true">add</span></summary>
@@ -339,7 +338,7 @@
 <footer class="w-full rounded-t-xl bg-surface-container-low px-5 md:px-16 py-12">
   <div class="flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl mx-auto text-center md:text-left">
     <div>
-      <div class="font-display font-bold text-2xl text-primary">SquishHaven</div>
+      <div class="font-display font-bold text-2xl text-primary">Loop Creativo</div>
       <p class="font-body text-sm text-on-surface-variant mt-1">Hecho con amor y nubes.</p>
     </div>
     <ul class="flex flex-wrap justify-center gap-6 font-body text-on-surface-variant">
@@ -348,7 +347,7 @@
       <li><a href="#preguntas" class="hover:text-secondary transition-colors">Preguntas</a></li>
       <li><a href="#" data-wa="general" target="_blank" rel="noopener" class="hover:text-secondary transition-colors">WhatsApp</a></li>
     </ul>
-    <p class="font-body text-sm text-secondary">© <span id="year"></span> SquishHaven</p>
+    <p class="font-body text-sm text-secondary">© <span id="year"></span> Loop Creativo</p>
   </div>
 </footer>
 
@@ -364,10 +363,13 @@
   <div id="cart-items" class="flex-1 overflow-y-auto px-6 flex flex-col gap-4"></div>
   <div class="px-6 py-6 bg-white rounded-t-lg" style="box-shadow: 0 -10px 30px -12px rgba(0,0,0,.08);">
     <div class="flex justify-between font-body text-lg mb-4"><span class="text-on-surface-variant">Total</span><span id="cart-total" class="font-bold text-on-surface">—</span></div>
-    <a id="cart-send" href="#" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 w-full bg-whatsapp text-white py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer">
-      <span class="material-symbols-outlined" aria-hidden="true">send</span> Enviar por WhatsApp
+    <a id="cart-checkout" href="#" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 w-full bg-secondary text-white py-4 rounded-full font-display text-xl font-bold squishy cursor-pointer" style="box-shadow: 0 12px 28px -10px rgba(50,101,120,.6);">
+      <span class="material-symbols-outlined" aria-hidden="true">lock</span> Finalizar compra
     </a>
-    <p class="font-body text-xs text-on-surface-variant text-center mt-3">Te confirmamos stock, pago y envío por chat.</p>
+    <p class="font-body text-xs text-on-surface-variant text-center mt-3">Terminás la compra en nuestra tienda online: elegís el envío y pagás con Mercado Pago, transferencia o efectivo.</p>
+    <a id="cart-send" href="#" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-1.5 font-body text-sm font-bold text-whatsapp-dark hover:underline underline-offset-4">
+      <span class="material-symbols-outlined text-lg" aria-hidden="true">chat</span> ¿Dudas? Consultalo por WhatsApp
+    </a>
   </div>
 </aside>
 
@@ -375,31 +377,39 @@
 // ─── Configuración (EDITAR ACÁ) ──────────────────────────────
 const CONFIG = {
   // Número con código de país, sin "+" ni espacios. Ej: 5491123456789
-  whatsapp: "5491100000000",
-  instagram: "squishhaven", // usuario sin @
-  tienda: "SquishHaven",
+  // Mientras esté vacío, los botones de WhatsApp no se muestran.
+  whatsapp: "",
+  instagram: "loopcreativo.ar", // usuario sin @
+  tienda: "Loop Creativo",
+  // Tienda online (Tiendanube) donde se termina la compra.
+  // El carrito se arma como: cart-link/VARIANTE-CANTIDAD,VARIANTE-CANTIDAD
+  carrito: "https://loopcreativo.com.ar/cart-link/",
+  utm: "landing",
 };
 
 // ─── Productos (EDITAR ACÁ) ──────────────────────────────────
+// variante: ID de la variante en Tiendanube (conecta el producto con la tienda).
+// stock: false → muestra "Sin stock" y el botón dice "Esperando Stock" (no se puede agregar).
 // fotos: rutas en /img. La primera es la principal; tocando la foto se pasa a la siguiente.
 // precio: número en pesos. Si es null, se muestra "Consultar precio".
 // color: "celeste" | "amarillo" | "rosa" (el fondo de la tarjeta)
 const PRODUCTOS = [
-  { id: "queso", nombre: "Queso Squeeze", categoria: "Comiditas", etiqueta: "Estirable", color: "amarillo", precio: null,
+  { id: "queso", nombre: "Squishy - Cheese", categoria: "Comiditas", etiqueta: "Estirable", color: "amarillo", precio: 23000,
+    variante: 1602794630, stock: false,
     descripcion: "Un cubito de queso de 7 cm que se aprieta, se estira y vuelve a su forma.",
     fotos: ["img/queso-1.jpg", "img/queso-2.jpg"] },
-  { id: "manteca", nombre: "Manteca Squishy", categoria: "Comiditas", etiqueta: "Súper estirable", color: "celeste", precio: null,
+  { id: "manteca", nombre: "Squishy - Butter", categoria: "Comiditas", etiqueta: "Súper estirable", color: "celeste", precio: 21000,
+    variante: 1602790360, stock: true,
     descripcion: "Un pan de manteca que se retuerce, se hunde y vuelve como nuevo.",
     fotos: ["img/manteca-1.jpg", "img/manteca-2.jpg", "img/manteca-3.jpg"] },
-  { id: "bao", nombre: "Bao en vaporera", categoria: "Baos", etiqueta: "Color sorpresa", color: "rosa", precio: null,
-    descripcion: "Un bollito con carita que viene en su propia vaporera. ¿Qué color te va a tocar?",
+  { id: "bao", nombre: "Squishy - Dumpling Color", categoria: "Dumplings", etiqueta: "Color sorpresa", color: "rosa", precio: 15000,
+    variante: 1602798364, stock: true,
+    descripcion: "Un dumpling con carita que viene en su propia vaporera. ¿Qué color te va a tocar?",
     fotos: ["img/bao-1.jpg", "img/bao-2.jpg", "img/bao-3.jpg"] },
-  { id: "bao-glitter", nombre: "Bao Glitter", categoria: "Glitter", etiqueta: "Con brillos", color: "celeste", precio: null,
-    descripcion: "El bao de siempre, pero lleno de brillitos que se mueven cuando lo apretás.",
+  { id: "bao-glitter", nombre: "Squishy - Dumpling Shiny", categoria: "Dumplings", etiqueta: "Con brillos", color: "celeste", precio: 15000,
+    variante: 1602798651, stock: true,
+    descripcion: "El dumpling de siempre, pero lleno de brillitos que se mueven cuando lo apretás.",
     fotos: ["img/bao-glitter-1.jpg", "img/bao-glitter-2.jpg"] },
-  { id: "gotita-glitter", nombre: "Gotita Glitter", categoria: "Glitter", etiqueta: "Con brillos", color: "rosa", precio: null,
-    descripcion: "Una gotita transparente llena de glitter, blandita y hipnótica.",
-    fotos: ["img/gotita-glitter-1.jpg"] },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -417,8 +427,13 @@ const WA_MENSAJES = {
 };
 
 // ─── Links de WhatsApp e Instagram ───────────────────────────
+const HAY_WA = /^\d{10,15}$/.test(CONFIG.whatsapp);
 $("#wa-fab").href = waLink(WA_MENSAJES.general);
-document.querySelectorAll("[data-wa]").forEach(a => a.href = waLink(WA_MENSAJES[a.dataset.wa]));
+$("#wa-fab").hidden = !HAY_WA;
+document.querySelectorAll("[data-wa]").forEach(a => {
+  a.href = waLink(WA_MENSAJES[a.dataset.wa]);
+  if (!HAY_WA) (a.closest("li, p") || a).hidden = true;
+});
 $("#ig-btn").href = `https://instagram.com/${CONFIG.instagram}`;
 $("#year").textContent = new Date().getFullYear();
 
@@ -448,7 +463,8 @@ function renderProductos() {
     return `
     <article class="card-neo rounded-xl p-5 pb-7 flex flex-col items-center text-center squishy group">
       <button ${varias ? `data-gal="${p.id}"` : "disabled"} data-i="0" class="relative w-full aspect-square rounded-lg overflow-hidden ${c.circulo} mb-6 ${varias ? "cursor-pointer" : "cursor-default"}" aria-label="${varias ? `Ver otra foto de ${p.nombre}` : p.nombre}">
-        <img src="${p.fotos[0]}" alt="Squishy ${p.nombre}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+        <img src="${p.fotos[0]}" alt="Squishy ${p.nombre}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${p.stock ? "" : "opacity-60 grayscale-[40%]"}"/>
+        ${p.stock ? "" : `<span class="absolute top-3 left-3 bg-on-surface text-white px-4 py-1.5 rounded-full font-label text-xs font-bold tracking-wide shadow-md">Sin stock</span>`}
         ${puntos}
       </button>
       <span class="${c.chip} px-4 py-1 rounded-full font-label text-xs font-bold tracking-wide mb-3">${p.etiqueta}</span>
@@ -456,13 +472,17 @@ function renderProductos() {
       <p class="font-body text-on-surface-variant mb-3 px-2">${p.descripcion}</p>
       <p class="font-body text-lg text-primary font-bold mb-6">${p.precio ? pesos(p.precio) : "Consultar precio"}</p>
       <div class="flex gap-3 w-full mt-auto">
+        ${p.stock ? `
         <button data-add="${p.id}" class="flex-1 bg-surface-container-high text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container py-3.5 rounded-full font-body font-bold flex items-center justify-center gap-2 squishy cursor-pointer">
           <span class="material-symbols-outlined" style="font-size:20px" aria-hidden="true">add_shopping_cart</span> Agregar al pedido
-        </button>
-        <a href="${waLink(`¡Hola ${CONFIG.tienda}! Me interesa el squishy "${p.nombre}". ¿Está disponible?`)}" target="_blank" rel="noopener"
+        </button>` : `
+        <button disabled aria-disabled="true" class="flex-1 bg-surface-container-low text-on-surface-variant/60 py-3.5 rounded-full font-body font-bold flex items-center justify-center gap-2 cursor-not-allowed border-2 border-dashed border-surface-container-high">
+          <span class="material-symbols-outlined" style="font-size:20px" aria-hidden="true">hourglass_empty</span> Esperando Stock
+        </button>`}
+        ${HAY_WA ? `<a href="${waLink(`¡Hola ${CONFIG.tienda}! Me interesa el squishy "${p.nombre}". ¿Está disponible?`)}" target="_blank" rel="noopener"
            class="w-14 shrink-0 rounded-full bg-whatsapp/15 text-whatsapp-dark hover:bg-whatsapp hover:text-white flex items-center justify-center squishy cursor-pointer" aria-label="Consultar ${p.nombre} por WhatsApp">
           <span class="material-symbols-outlined" aria-hidden="true">chat</span>
-        </a>
+        </a>` : ""}
       </div>
     </article>`;
   }).join("");
@@ -493,6 +513,7 @@ try { pedido = JSON.parse(localStorage.getItem("squish-pedido")) || {}; } catch 
 const guardar = () => { try { localStorage.setItem("squish-pedido", JSON.stringify(pedido)); } catch (_) {} };
 
 function agregar(id) {
+  if (!PRODUCTOS.find(p => p.id === id)?.stock) return; // sin stock: no entra al pedido
   pedido[id] = (pedido[id] || 0) + 1;
   guardar(); renderPedido();
   const btn = $("#cart-btn");
@@ -506,7 +527,9 @@ function cambiar(id, delta) {
 }
 
 function renderPedido() {
-  const items = Object.entries(pedido).map(([id, cant]) => ({ ...PRODUCTOS.find(p => p.id === id), cant })).filter(i => i.nombre);
+  // Por si quedó guardado un producto que después se quedó sin stock
+  Object.keys(pedido).forEach(id => { if (!PRODUCTOS.find(p => p.id === id)?.stock) delete pedido[id]; });
+  const items = Object.entries(pedido).map(([id, cant]) => ({ ...PRODUCTOS.find(p => p.id === id), cant }));
   const total = items.reduce((n, i) => n + i.cant, 0);
   const counter = $("#cart-counter");
   counter.textContent = total;
@@ -538,13 +561,19 @@ function renderPedido() {
   const conPrecio = items.every(i => i.precio);
   $("#cart-total").textContent = !items.length ? "—" : conPrecio ? pesos(items.reduce((n, i) => n + i.precio * i.cant, 0)) : "A consultar";
 
+  // Link al carrito de la tienda: 1602790360-2,1602798364-1
+  const checkout = $("#cart-checkout");
+  checkout.classList.toggle("opacity-40", !items.length);
+  checkout.classList.toggle("pointer-events-none", !items.length);
+  checkout.href = `${CONFIG.carrito}${items.map(i => `${i.variante}-${i.cant}`).join(",")}?utm_source=${CONFIG.utm}`;
+
   const send = $("#cart-send");
-  send.classList.toggle("opacity-40", !items.length);
-  send.classList.toggle("pointer-events-none", !items.length);
+  send.hidden = !items.length || !HAY_WA;
   send.href = waLink(
     `¡Hola ${CONFIG.tienda}! Quiero hacer este pedido:\n` +
-    items.map(i => `• ${i.cant} x ${i.nombre}`).join("\n") +
-    `\n\n¿Me confirmás disponibilidad, precio y opciones de envío? ¡Gracias!`
+    items.map(i => `• ${i.cant} x ${i.nombre}${i.precio ? ` (${pesos(i.precio * i.cant)})` : ""}`).join("\n") +
+    (conPrecio ? `\n\nTotal: ${pesos(items.reduce((n, i) => n + i.precio * i.cant, 0))}` : "") +
+    `\n\n¿Me confirmás disponibilidad y opciones de envío? ¡Gracias!`
   );
 }
 $("#cart-items").addEventListener("click", e => {
